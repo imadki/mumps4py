@@ -4,12 +4,12 @@ import os
 from mpi4py import MPI
 from mumps4py.mumps_solver import MumpsSolver
 
-@pytest.mark.skipif("cmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="cmumps not selected")
+# @pytest.mark.skipif("cmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="cmumps not selected")
 def test_solve_single():
     solver = MumpsSolver(verbose=False, system="complex64")
 
     dtype = np.complex64
-    
+
     n = 5
     irn = np.array([0,1,3,4,1,0,4,2,1,2,0,2], dtype=np.int32)
     jcn = np.array([1,2,2,4,0,0,1,3,4,1,2,2], dtype=np.int32)
