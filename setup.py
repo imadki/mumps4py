@@ -185,7 +185,7 @@ def get_ext_modules():
     # Check for solver libraries
     for solver in mumps_libraries:
         lib_found = False
-        for ext in ['.a', '.dll.a','.lib'] if SYSTEM == 'windows' else ['.so', '.a']:
+        for ext in ['.a', '.dll.a','.lib'] if SYSTEM == 'windows' else ['.so', '.a','.dylib']:
             lib_file = os.path.join(MUMPS_LIB_DIR, f'lib{solver}{ext}' if SYSTEM != 'windows' else f'{solver}{ext}')
             if os.path.exists(lib_file):
                 lib_found = True
