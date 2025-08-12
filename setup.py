@@ -60,7 +60,7 @@ class CleanCommand(Command):
         pass
 
     def run(self):
-        folders_to_remove = ['build', 'dist', 
+        folders_to_remove = ['build', 'dist',
                              'mumps4py.egg-info']
         for folder in folders_to_remove:
             if os.path.exists(folder):
@@ -86,7 +86,7 @@ metadata = {
     "description": "MUMPS for Python",
     "long_description": open(os.path.join(topdir, 'README.md')).read() if \
     os.path.exists(os.path.join(topdir, 'README.md')) else "A Python interface to the MUMPS solver library",
-    "long_description_content_type":"text/markdown", 
+    "long_description_content_type":"text/markdown",
     "keywords": ['MUMPS', 'solver', 'MPI'],
     "url": "https://github.com/imadki/mumps4py",
     "download_url": "https://pypi.io/packages/source/m/mumps4py/mumps4py-0.1.0.tar.gz",
@@ -137,7 +137,7 @@ def run_cython(source, includes=(), force=False):
 
 def get_ext_modules():
     import platform
-    
+
     wrapper_script = os.path.join(topdir, 'utils', 'cython_wrapper.py')
     if not os.path.exists(wrapper_script):
         raise FileNotFoundError(f"Wrapper script not found: {wrapper_script}")
@@ -150,7 +150,7 @@ def get_ext_modules():
 
     # Détection de la plateforme
     SYSTEM = platform.system().lower()  # 'windows', 'linux', 'darwin' pour macOS
-    
+
     # Use environment variables for external paths
     MUMPS_INCLUDE_DIR = os.environ.get('MUMPS_INC', "")
     MUMPS_LIB_DIR = os.environ.get('MUMPS_LIB', "")
@@ -158,22 +158,22 @@ def get_ext_modules():
     if not MUMPS_INCLUDE_DIR or not MUMPS_LIB_DIR:
         raise RuntimeError("MUMPS_INC and MUMPS_LIB must be set before using mumps4py.")
 
-    
+
     mumps_solvers = os.environ.get('MUMPS_SOLVERS', 'dmumps').split(',')
     mumps_libraries = mumps_solvers = [s.strip() for s in mumps_solvers if s.strip()] or ['dmumps']
 
-    # Map solver names to MSYS2-style names if needed
-    solver_map = {
-        'cmumps': 'mumps-cso',  # Complex single precision, sequential
-        'dmumps': 'mumps-dso',  # Double precision, sequential
-        'smumps': 'mumps-sso',  # Single precision, sequential
-        'zmumps': 'mumps-zso',  # Complex double precision, sequential
-    }
+    # # Map solver names to MSYS2-style names if needed
+    # solver_map = {
+    #     'cmumps': 'mumps-cso',  # Complex single precision, sequential
+    #     'dmumps': 'mumps-dso',  # Double precision, sequential
+    #     'smumps': 'mumps-sso',  # Single precision, sequential
+    #     'zmumps': 'mumps-zso',  # Complex double precision, sequential
+    # }
 
-    # Adjust solver names for MSYS2 (e.g., dmumps -> dso)
-    if SYSTEM == 'windows':
-        mumps_libraries = [solver_map.get(solver, solver) for solver in mumps_solvers]
-    
+    # # Adjust solver names for MSYS2 (e.g., dmumps -> dso)
+    # if SYSTEM == 'windows':
+    #     mumps_libraries = [solver_map.get(solver, solver) for solver in mumps_solvers]
+
     # Check for header files
     for solver in mumps_solvers:
         header_file = os.path.join(MUMPS_INCLUDE_DIR, f'{solver}_c.h')
@@ -185,8 +185,8 @@ def get_ext_modules():
     # Check for solver libraries
     for solver in mumps_libraries:
         lib_found = False
-        for ext in ['.a', '.dll.a'] if SYSTEM == 'windows' else ['.so', '.a']:
-            lib_file = os.path.join(MUMPS_LIB_DIR, f'lib{solver}{ext}')
+        for ext in ['.a', '.dll.a','.lib'] if SYSTEM == 'windows' else ['.so', '.a']:
+            lib_file = os.path.join(MUMPS_LIB_DIR, f'lib{solver}{ext}' if SYSTEM != 'windows' else f'{solver}{ext}')
             if os.path.exists(lib_file):
                 lib_found = True
                 break
@@ -199,7 +199,7 @@ def get_ext_modules():
     mumps4py_dir = 'mumps4py'
     os.makedirs(mumps4py_dir, exist_ok=True)
     output_file = os.path.join(mumps4py_dir, '_mumps_wrapper.pyx')
-    
+
     cython_code = ''
     for solver in mumps_solvers:
         header_file = os.path.join(MUMPS_INCLUDE_DIR, f'{solver}_c.h')
