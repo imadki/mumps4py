@@ -215,6 +215,40 @@ class MumpsSolver:
     ####################################################################
     # Distributed (each process enters some portion of the matrix)
     ####################################################################
+    def set_rc_distributed(self, ir_loc, ic_loc, n):
+        """Set the distributed assembled row col.
+    
+        Distributed assembled matrices require setting icntl(18) != 0.
+        """
+        
+        """
+        Set the matrix by row and column indicies and data vector.
+        The matrix shape is determined by the maximal values of
+        row and column indicies. The indices start with 1.
+    
+        Parameters
+        ----------
+        ir_loc : local array
+            The row idicies.
+        ic_loc : local array
+            The column idicies.
+        n : int
+            The matrix dimension. (set by the rank 0)
+        """
+        assert ir_loc.shape[0] == ic_loc.shape[0] 
+        if self.comm.Get_rank() == 0:
+            self.struct.n = n  # Matrix size
+        self.struct.nz_loc = ir_loc.shape[0]
+        
+        if hasattr(self.struct, 'nnz_loc'):
+            self.struct.nnz_loc = ir_loc.shape[0]
+        
+        self.struct.irn_loc = self.transform_arr(ir_loc)
+        self.struct.jcn_loc = self.transform_arr(ic_loc)
+        
+    ####################################################################
+    # Distributed (each process enters some portion of the matrix)
+    ####################################################################
     def set_rcd_distributed(self, ir_loc, ic_loc, data_loc, n):
         """Set the distributed assembled matrix.
 
