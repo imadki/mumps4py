@@ -4,7 +4,7 @@ import os
 from mpi4py import MPI
 from mumps4py.mumps_solver import MumpsSolver
 
-@pytest.mark.skipif("dmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="dmumps not selected")
+# @pytest.mark.skipif("dmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="dmumps not selected")
 def test_solve_double():
     solver = MumpsSolver(verbose=False, system="double")
 
