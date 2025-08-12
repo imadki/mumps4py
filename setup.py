@@ -216,7 +216,13 @@ def get_ext_modules():
         f.write(cython_code)
 
     # Define the extension with external paths
-    extra_link_args = ['-Wl,--allow-multiple-definition'] if SYSTEM != 'windows' else []
+    if SYSTEM == 'windows':
+        extra_link_args = []
+    elif SYSTEM == 'darwin':
+        extra_link_args = ['-Wl']
+    elif  SYSTEM == 'linux':
+        extra_link_args = ['-Wl,--allow-multiple-definition']
+
     return [Extension('mumps4py._mumps_wrapper',
                       sources=[output_file],
                       include_dirs=[MUMPS_INCLUDE_DIR],
