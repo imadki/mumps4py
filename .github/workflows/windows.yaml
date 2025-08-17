@@ -32,9 +32,9 @@ jobs:
 
     - name: Build and Test mumps4py
       run: |
-        echo $env:PREFIX
-        $env:MUMPS_INC=$env:CONDA_PREFIX\Library\include
-        $env:MUMPS_LIB=$env:CONDA_PREFIX\Library\lib
+        
+        $env:MUMPS_INC=$env:CONDA\envs\Envwindows\Library\include
+        $env:MUMPS_LIB=$env:CONDA\envs\Envwindows\Library\lib
         $env:MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
         $env:PATH=$env:PATH;$env:MUMPS_LIB
         python setup.py build_ext --inplace --compiler=mingw64
