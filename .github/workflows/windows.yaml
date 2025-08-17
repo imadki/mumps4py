@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
-    defaults:
-      run:
-        shell: cmd
     strategy:
       matrix:
         python-version: ["3.12"]
@@ -35,11 +32,11 @@ jobs:
 
     - name: Build and Test mumps4py
       run: |
-        echo %CONDA_PREFIX%
-        set MUMPS_INC=%CONDA_PREFIX%\Library\include
-        set MUMPS_LIB=%CONDA_PREFIX%\Library\lib
-        set MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
-        set PATH=%PATH%;%MUMPS_LIB%
+        echo $env:CONDA_PREFIX
+        $env:MUMPS_INC=$env:CONDA_PREFIX\Library\include
+        $env:MUMPS_LIB=$env:CONDA_PREFIX\Library\lib
+        $env:MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
+        $env:PATH=$env:PATH;$env:MUMPS_LIB
         python setup.py build_ext --inplace --compiler=mingw64
         pip install .
         pytest ${{ github.workspace }}/tests
