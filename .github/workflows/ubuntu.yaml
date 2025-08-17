@@ -8,9 +8,13 @@ on:
 
 jobs:
   test:
+    name: Test ${{ matrix.python-version }}
     defaults:
       run:
         shell: bash -l {0}
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
     runs-on: ubuntu-latest
 
     steps:
