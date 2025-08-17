@@ -1,129 +1,37 @@
-name: CI MUMPS4PY (macOS)
+name: Test MacOS Build
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-  build-and-test-macos:
+  test:
+    defaults:
+      run:
+        shell: bash -l {0}
     runs-on: macos-latest
 
-    env:
-      MUMPS_SOLVERS: dmumps,zmumps,smumps,cmumps
-      MUMPS_INC: ${{ github.workspace }}/MUMPS_5.7.3/include
-      MUMPS_LIB: ${{ github.workspace }}/MUMPS_5.7.3/lib
-
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install system packages + OpenMPI + gfortran
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: EnvMacOS
+        environment-file: tests/env_macOS.yml
+        auto-activate-base: false
+        conda-remove-defaults: "true"
+
+    - name: Build and Test mumps4py
       run: |
-        brew update
-        brew install open-mpi openblas lapack cmake gcc
-        GFORTRAN_PATH=$(find $(brew --prefix gcc)/bin -name 'gfortran-*' | head -n 1)
-        if [ -z "$GFORTRAN_PATH" ]; then
-          echo "Error: gfortran not found after installing gcc"
-          exit 1
-        fi
-        GFORTRAN_BIN=$(basename $GFORTRAN_PATH)
-        echo "Found gfortran: $GFORTRAN_BIN"
-        $GFORTRAN_BIN --version
-        echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
-        echo "PATH after update: $PATH"
-        which $GFORTRAN_BIN
-
-    - name: Install METIS 5.1.0 from SourceForge
-      run: |
-        curl -L -o metis-5.1.0.tar.gz https://sourceforge.net/projects/openfoam-extend/files/foam-extend-3.0/ThirdParty/metis-5.1.0.tar.gz/download
-        tar -xzf metis-5.1.0.tar.gz
-        
-        cd metis-5.1.0
-        mkdir -p build && cd build
-        cmake .. -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/metis -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DGKLIB_PATH=../GKlib
-        make -j$(sysctl -n hw.ncpu)
-        make install
-        echo "METIS_DIR=$GITHUB_WORKSPACE/metis" >> $GITHUB_ENV
-      
-    - name: Check METIS installation
-      run: |
-        ls -l "$METIS_DIR/include/metis.h"
-        ls -l "$METIS_DIR/lib/libmetis.a"
-
-    - name: Install MUMPS 5.7.3 (parallel + shared with mpicc/mpif90, no OpenMP)
-      run: |
-        curl -L https://coin-or-tools.github.io/ThirdParty-Mumps/MUMPS_5.7.3.tar.gz -o MUMPS_5.7.3.tar.gz
-        tar xzf MUMPS_5.7.3.tar.gz
-        cd MUMPS_5.7.3
-        cp Make.inc/Makefile.debian.PAR Makefile.inc
-
-        # Remove SCOTCH-related settings
-        sed -i '' '/^SCOTCH/d' Makefile.inc
-        sed -i '' '/^ISCOTCH/d' Makefile.inc
-        sed -i '' '/^LSCOTCH/d' Makefile.inc
-
-        # Use mpicc/mpif90 with gfortran
-        echo "CC = mpicc" >> Makefile.inc
-        echo "FC = mpif90" >> Makefile.inc
-        echo "FL = mpif90" >> Makefile.inc
-
-        # Compiler and linker flags
-        echo "CFLAGS = -O -fPIC" >> Makefile.inc
-        echo "LDFLAGS = -L${METIS_DIR}/lib -Wl,-rpath,${METIS_DIR}/lib" >> Makefile.inc
-        echo "OPTC = -O -fPIC -I${METIS_DIR}/include" >> Makefile.inc
-        echo "OPTF = -O2 -fallow-argument-mismatch -fPIC" >> Makefile.inc
-
-        # External libraries
-        echo "LIBBLAS = -L$(brew --prefix openblas)/lib -lopenblas" >> Makefile.inc
-        echo "LIBMETIS = ${METIS_DIR}/lib" >> Makefile.inc
-        echo "IMETIS = -I${METIS_DIR}/include" >> Makefile.inc
-        echo "SONAMEOPT = " >> Makefile.inc
-
-        # Replace -soname with -install_name for macOS
-        find . -name "Makefile*" -exec sed -i '' 's/-soname/-install_name/g' {} \;
-
-        # Remove OpenMP and Scotch options
-        find . -name "Makefile*" -exec sed -i '' 's/-fopenmp//g' {} \;
-        find . -name "Makefile*" -exec sed -i '' 's/-Xpreprocessor -fopenmp//g' {} \;
-        find . -name "Makefile*" -exec sed -i '' 's/-Dscotch//g' {} \;
-
-        # Build PORD
-        cd PORD/lib
-        make PLAT="" FPIC="-fPIC" CC="mpicc" CFLAGS="-O -fPIC" AR="ar vr " RANLIB="ranlib" OUTC="-o " LIBEXT=".a" LIBEXT_SHARED=".dylib" libpord.dylib
-        cd ../..
-
-        # Compile additional sources
-        mpicc -I./include -O -fPIC -c ./src/graph.c -o ./src/graph.o || true
-        mpicc -I./include -O -fPIC -c ./src/gbipart.c -o ./src/gbipart.o || true
-        mpicc -I./include -O -fPIC -c ./src/gbisect.c -o ./src/gbisect.o || true
-
-        # Build MUMPS
-        make -j$(sysctl -n hw.ncpu) allshared V=1
-
-        # Organize headers and libraries
-        mkdir -p include lib
-        cp include/*.h include/
-        cp *.mod include/ || true
-        cp lib/*.a lib/ || true
-        cp lib/*.dylib lib/ || true
-        cp libseq/libmpiseq.a lib/ || true
-
-    - name: Install Python packages
-      run: |
-        python -m pip install --upgrade pip
-        pip install numpy mpi4py cython pytest
-
-    - name: Build mumps4py (no OpenMP)
-      run: |
-        export CC=mpicc
-        export CFLAGS="-O -fPIC -I${MUMPS_INC} -I${METIS_DIR}/include"
-        export LDFLAGS="-L${MUMPS_LIB} -Wl,-rpath,${MUMPS_LIB} -Wl,-rpath,${METIS_DIR}/lib"
-        python setup.py build_ext --inplace --verbose
+        export MUMPS_INC="$(conda info --base)/envs/EnvMacOS/include"
+        export MUMPS_LIB="$(conda info --base)/envs/EnvMacOS/lib"
+        export MUMPS_SOLVERS="dmumps,cmumps,zmumps,smumps"
+        export DYLD_LIBRARY_PATH="$MUMPS_LIB:$DYLD_LIBRARY_PATH"
+        python setup.py build_ext --inplace
         pip install .
-
-    - name: Run tests
-      run: |
-        python -c "import mumps4py; print(f'MUMPS4PY successfully imported from {mumps4py.__file__}')"
-        mpiexec -n 2 pytest -v
+        pytest ${{ github.workspace }}/tests
+        
