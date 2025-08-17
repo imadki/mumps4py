@@ -8,11 +8,14 @@ on:
 
 jobs:
   test:
+    name: Test ${{ matrix.python-version }}
     defaults:
       run:
         shell: bash -l {0}
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
     runs-on: macos-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -24,6 +27,7 @@ jobs:
         environment-file: tests/env_macOS.yml
         auto-activate-base: false
         conda-remove-defaults: "true"
+        python-version: ${{ matrix.python-version }}
 
     - name: Build and Test mumps4py
       run: |
