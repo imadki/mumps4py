@@ -1,6 +1,6 @@
 name: EnvUbuntu
 
-channel:
+channels:
   - conda-forge
   - defaults
 
