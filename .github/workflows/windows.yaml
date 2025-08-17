@@ -40,7 +40,7 @@ jobs:
         set MUMPS_LIB=%CONDA_PREFIX%\Library\lib
         set MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
         set PATH=%PATH%;%MUMPS_LIB%
-        python setup.py build_ext --inplace
+        python setup.py build_ext --inplace --compiler=mingw64
         pip install .
         pytest ${{ github.workspace }}/tests
         
