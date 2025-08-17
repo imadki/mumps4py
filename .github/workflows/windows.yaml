@@ -34,13 +34,13 @@ jobs:
         compiler: latest
 
     - name: Build and Test mumps4py
-      run: |
-        echo %CONDA_PREFIX%
-        set MUMPS_INC=%CONDA_PREFIX%\Library\include
-        set MUMPS_LIB=%CONDA_PREFIX%\Library\lib
-        set MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
-        set PATH=%PATH%;%MUMPS_LIB%
-        python setup.py build_ext --inplace
-        pip install .
-        pytest ${{ github.workspace }}/tests
+      run:
+        - echo %CONDA_PREFIX%
+        - set MUMPS_INC=%CONDA_PREFIX%\Library\include
+        - set MUMPS_LIB=%CONDA_PREFIX%\Library\lib
+        - set MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
+        - set PATH=%PATH%;%MUMPS_LIB%
+        - python setup.py build_ext --inplace --compiler=mingw64
+        - pip install .
+        - pytest ${{ github.workspace }}/tests
         
