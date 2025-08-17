@@ -7,9 +7,9 @@ channels:
 dependencies:
   - cxx-compiler 
   - cython
-  - python  
-  - mumps-mpi      
-  - mumps-include  
+  - python=3.12
+  - mumps-mpi=5.8.1   
+  - mumps-include=5.8.1 
   - numpy
   - setuptools
   - mpi4py
