@@ -32,7 +32,7 @@ jobs:
 
     - name: Build and Test mumps4py
       run: |
-        echo $env:CONDA_PREFIX
+        echo $env:PREFIX
         $env:MUMPS_INC=$env:CONDA_PREFIX\Library\include
         $env:MUMPS_LIB=$env:CONDA_PREFIX\Library\lib
         $env:MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
