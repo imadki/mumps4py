@@ -1,0 +1,16 @@
+name: EnvUbuntu
+
+channel:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - cxx-compiler 
+  - cython
+  - python  
+  - mumps-mpi      
+  - mumps-include  
+  - numpy
+  - setuptools
+  - mpi4py
+  - pip
