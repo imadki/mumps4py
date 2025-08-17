@@ -1,4 +1,4 @@
-name: CI MUMPS4PY (Windows)
+name: Test Windows Build
 
 on:
   push:
@@ -7,96 +7,40 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    defaults:
+      run:
+        shell: cmd
+    strategy:
+      matrix:
+        python-version: ["3.12"]
     runs-on: windows-latest
-
-    env:
-      MUMPS_SOLVERS: dmumps
-      MUMPS_ROOT: ${{ github.workspace }}\mumps
-      MUMPS_INC: ${{ github.workspace }}\mumps\include
-      MUMPS_LIB: ${{ github.workspace }}\mumps\lib
-
     steps:
-    - name: Setup MSYS2 with required packages
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: |
-          mingw-w64-x86_64-gcc-fortran
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-make
-          mingw-w64-x86_64-ninja
-          mingw-w64-x86_64-lapack
-          mingw-w64-x86_64-openblas
-          mingw-w64-x86_64-python
-          mingw-w64-x86_64-python-pip
-          mingw-w64-x86_64-python-numpy
-          mingw-w64-x86_64-python-scipy
-          mingw-w64-x86_64-python-mpi4py
-          mingw-w64-x86_64-msmpi
-
-    - name: Add MSYS2 MinGW64 to PATH
-      shell: bash
-      run: |
-        echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
-        echo "C:/Program Files (x86)/Microsoft SDKs/MPI" >> $GITHUB_PATH
-
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download and extract MUMPS
-      shell: msys2 {0}
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: Envwindows
+        environment-file: tests/env_windows.yml
+        auto-activate-base: false
+        conda-remove-defaults: "true"
+    - name: Install compiler
+      id: install_cc
+      uses: rlalik/setup-cpp-compiler@master
+      with:
+        compiler: latest
+
+    - name: Build and Test mumps4py
       run: |
-        curl -L -o mumps.tgz https://coin-or-tools.github.io/ThirdParty-Mumps/MUMPS_5.7.0.tar.gz
-        if [ $? -ne 0 ]; then echo "Download failed"; exit 1; fi
-        tar -xf mumps.tgz
-        mv MUMPS_5.7.0 mumps
-
-    - name: Configure and build MUMPS with MSMPI
-      shell: msys2 {0}
-      run: |
-        cd mumps
-        cp Make.inc/Makefile.inc.generic Makefile.inc
-        echo "LIBBLAS = -lopenblas" >> Makefile.inc
-        echo "LIBLAPACK = -llapack" >> Makefile.inc
-        echo "LPORDDIR = ./PORD/lib/" >> Makefile.inc
-        echo "IPORD = -lpord" >> Makefile.inc
-        echo "LMETISDIR = " >> Makefile.inc
-        echo "IMETIS = " >> Makefile.inc
-        echo "SCOTCHDIR = " >> Makefile.inc
-        echo "ISCOTCH = " >> Makefile.inc
-        echo "CC = gcc" >> Makefile.inc
-        echo "FC = gfortran" >> Makefile.inc
-        echo "FL = gfortran" >> Makefile.inc
-        echo "OPTF = -O3" >> Makefile.inc
-        echo "OPTC = -O3" >> Makefile.inc
-        mkdir -p lib include
-
-        # Verify make is available
-        which make
-        make --version
-
-        make all
-        cp include/*.h include/
-        cp lib/*.a lib/
-
-    - name: Install Python dependencies
-      shell: msys2 {0}
-      run: |
-        python -m pip install --upgrade pip
-        pip install cython pytest
-
-    - name: Build mumps4py
-      shell: msys2 {0}
-      run: |
+        echo %CONDA_PREFIX%
+        set MUMPS_INC=%CONDA_PREFIX%\Library\include
+        set MUMPS_LIB=%CONDA_PREFIX%\Library\lib
+        set MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
+        set PATH=%PATH%;%MUMPS_LIB%
         python setup.py build_ext --inplace
         pip install .
-
-    - name: Check mumps4py module
-      shell: msys2 {0}
-      run: python -c "import mumps4py; print(mumps4py.__file__)"
-
-    - name: Run mumps4py tests
-      shell: msys2 {0}
-      run: |
-        mpiexec -n 2 pytest -v
+        pytest ${{ github.workspace }}/tests
+        
