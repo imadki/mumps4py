@@ -32,12 +32,10 @@ jobs:
 
     - name: Build and Test mumps4py
       run: |
-        
-        $env:MUMPS_INC=$env:CONDA\envs\Envwindows\Library\include
-        $env:MUMPS_LIB=$env:CONDA\envs\Envwindows\Library\lib
-        $env:MUMPS_SOLVERS=dmumps,cmumps,zmumps,smumps
-        $env:PATH=$env:PATH;$env:MUMPS_LIB
-        python setup.py build_ext --inplace --compiler=mingw64
+      	$env:MUMPS_INC = Join-Path $env:CONDA_PREFIX 'Library\include'
+        $env:MUMPS_LIB = Join-Path $env:CONDA_PREFIX 'Library\lib'
+        $env:MUMPS_SOLVERS = 'dmumps,cmumps,zmumps,smumps'
+        $env:PATH = "$env:PATH;$env:MUMPS_LIB"
+        python setup.py build_ext --inplace --compiler=msvc
         pip install .
-        pytest ${{ github.workspace }}/tests
-        
+        pytest -q tests        
