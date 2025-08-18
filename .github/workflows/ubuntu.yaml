@@ -1,4 +1,4 @@
-name: CI MUMPS4PY
+name: Test Ubuntu Build
 
 on:
   push:
@@ -7,42 +7,34 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     runs-on: ubuntu-latest
 
-    env:
-      MUMPS_SOLVERS: dmumps,zmumps,smumps,cmumps
-      MUMPS_INC: /usr/include
-      MUMPS_LIB: /usr/lib/x86_64-linux-gnu
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            gfortran cmake make wget tar \
-            libopenmpi-dev openmpi-bin \
-            liblapack-dev libblas-dev \
-            libscalapack-openmpi-dev \
-            libmetis-dev libparmetis-dev \
-            libscotch-dev libptscotch-dev \
-            libatlas-base-dev \
-            libmumps-seq-dev libmumps-ptscotch-dev \
-            python3-dev python3-pip
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: EnvUbuntu
+        environment-file: tests/env_ubuntu.yml
+        auto-activate-base: false
+        conda-remove-defaults: "true"
 
-      - name: Install Python deps
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install cython numpy mpi4py pytest
-
-      - name: Build mumps4py
-        run: |
-          python3 setup.py build_ext --inplace
-          pip3 install .
-
-      - name: Run tests
-        run: |
-          mpirun -n 1 pytest -v
+    - name: Build and Test mumps4py
+      run: |
+        export MUMPS_INC="$(conda info --base)/envs/EnvUbuntu/include"
+        export MUMPS_LIB="$(conda info --base)/envs/EnvUbuntu/lib"
+        export MUMPS_SOLVERS="dmumps,cmumps,zmumps,smumps"
+        python setup.py build_ext --inplace
+        pip install .
+        pytest ${{ github.workspace }}/tests
+        

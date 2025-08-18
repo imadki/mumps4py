@@ -4,7 +4,7 @@ import os
 from mpi4py import MPI
 from mumps4py.mumps_solver import MumpsSolver
 
-@pytest.mark.skipif("zmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="zmumps not selected")
+# @pytest.mark.skipif("zmumps" not in os.getenv("MUMPS_SOLVERS", "").split(","), reason="zmumps not selected")
 def test_solve_single():
     solver = MumpsSolver(verbose=False, system="single")
 

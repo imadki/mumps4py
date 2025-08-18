@@ -1,0 +1,17 @@
+name: EnvMacOS
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - cxx-compiler 
+  - cython
+  - mumps-mpi=5.8.1   
+  - mumps-include=5.8.1 
+  - numpy
+  - setuptools
+  - libscotch
+  - mpi4py
+  - pip
+  - pytest

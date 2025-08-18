@@ -1,0 +1,14 @@
+name: EnvWindows
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - cython
+  - mumps-seq=5.8.1   
+  - numpy
+  - setuptools
+  - mpi4py
+  - pip
+  - pytest

@@ -42,18 +42,22 @@ def parse_c_struct(header_file, struct_name):
 
     return fields
 
+
 def generate_cython_wrapper(fields, class_name, filename):
     """Generates a full Cython .pyx file, handling scalars, pointers, and arrays."""
-    
+
     cython_code = f"__all__ = ['{class_name}', '{filename}']\n\n"
-    cython_code += "from libc cimport stdint\n\n"
-    
+    cython_code += "from libc.stdint cimport uintptr_t, int64_t\n"
+    cython_code += "cdef extern from \"stddef.h\":\n"
+    cython_code += "    ctypedef size_t size_t\n"
+    cython_code += "    size_t sizeof(...)\n\n"
+
     cython_code += f"""cdef extern from '{filename}':  
 
     ctypedef int MUMPS_INT
     ctypedef double {class_name[0]}MUMPS_COMPLEX
     ctypedef double {class_name[0]}MUMPS_REAL
-    ctypedef stdint.int64_t MUMPS_INT8
+    ctypedef int64_t MUMPS_INT8
 
     char* MUMPS_VERSION
 
@@ -66,15 +70,11 @@ def generate_cython_wrapper(fields, class_name, filename):
             cython_code += f"        {ctype}{ptr} {varname}\n"
 
     cython_code += f"\n    void c_{filename[:-2]} '{filename[:-2]}' (c_{class_name} *) nogil\n\n"
-    
-    #Add the sizeof declaration and get_mumps_int_size function here
-    cython_code += """cdef extern from "stddef.h":
-    size_t sizeof()\n\n"""
-    
+
     cython_code += """def get_mumps_int_size():
     \"\"\"Return the size of MUMPS_INT in bytes.\"\"\"
     return sizeof(MUMPS_INT)\n\n"""
-    
+
     cython_code += f"cdef class {class_name}:\n"
     cython_code += f"    cdef c_{class_name} obj\n\n"
 
@@ -82,22 +82,23 @@ def generate_cython_wrapper(fields, class_name, filename):
         if array_size:
             cython_code += f"""    property {varname}:
         def __get__(self):
+            # Warning: direct memoryview on fixed-size array
             cdef {ctype}[:] view = self.obj.{varname}
-            return view \n\n"""
-       
+            return view\n\n"""
+
         elif ptr:
             cython_code += f"""    property {varname}:
-        def __get__(self): return <long> self.obj.{varname}
-        def __set__(self, long value): self.obj.{varname} = <{ctype}*> value\n\n"""
-        
+        def __get__(self): return <uintptr_t> self.obj.{varname}
+        def __set__(self, value): self.obj.{varname} = <{ctype}*> (<uintptr_t> value)\n\n"""
+
         else:
             cython_code += f"""    property {varname}:
         def __get__(self): return self.obj.{varname}
         def __set__(self, value): self.obj.{varname} = value\n\n"""
-        
-    cython_code += """def """+filename[:-2]+"("+class_name+""" s not None):
+
+    cython_code += f"""def {filename[:-2]}({class_name} s not None):
     with nogil:
-        c_"""+filename[:-2]+"""(&s.obj)
+        c_{filename[:-2]}(&s.obj)
 
 __version__ = (<bytes> MUMPS_VERSION).decode('ascii')
 """
