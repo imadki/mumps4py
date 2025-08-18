@@ -32,7 +32,7 @@ jobs:
 
     - name: Build and Test mumps4py
       run: |
-      	$env:MUMPS_INC = Join-Path $env:CONDA_PREFIX 'Library\include'
+        $env:MUMPS_INC = Join-Path $env:CONDA_PREFIX 'Library\include'
         $env:MUMPS_LIB = Join-Path $env:CONDA_PREFIX 'Library\lib'
         $env:MUMPS_SOLVERS = 'dmumps,cmumps,zmumps,smumps'
         $env:PATH = "$env:PATH;$env:MUMPS_LIB"
