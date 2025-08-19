@@ -34,7 +34,5 @@ jobs:
         export MUMPS_INC="$(conda info --base)/envs/EnvUbuntu/include"
         export MUMPS_LIB="$(conda info --base)/envs/EnvUbuntu/lib"
         export MUMPS_SOLVERS="dmumps,cmumps,zmumps,smumps"
-        python setup.py build_ext --inplace
-        pip install .
+        pip install . -vv --global-option="build_ext" --global-option="--inplace"
         pytest ${{ github.workspace }}/tests
-        

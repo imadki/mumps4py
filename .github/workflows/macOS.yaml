@@ -35,7 +35,5 @@ jobs:
         export MUMPS_LIB="$(conda info --base)/envs/EnvMacOS/lib"
         export MUMPS_SOLVERS="dmumps,cmumps,zmumps,smumps"
         export DYLD_LIBRARY_PATH="$MUMPS_LIB:$DYLD_LIBRARY_PATH"
-        python setup.py build_ext --inplace
-        pip install .
+        pip install . -vv --global-option="build_ext" --global-option="--inplace"
         pytest ${{ github.workspace }}/tests
-        
