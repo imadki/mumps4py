@@ -255,7 +255,7 @@ def run_setup():
             'clean': CleanCommand,
             'sdist': sdist,
         },
-        install_requires=[],
+        install_requires=['numpy', 'mpi4py', f'Cython>={CYTHON_VERSION}'],
         zip_safe=False,
         **metadata
     )
