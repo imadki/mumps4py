@@ -36,5 +36,5 @@ jobs:
         $env:MUMPS_LIB = Join-Path $env:CONDA_PREFIX 'Library\lib'
         $env:MUMPS_SOLVERS = 'dmumps,cmumps,zmumps,smumps'
         $env:PATH = "$env:PATH;$env:MUMPS_LIB"
-        pip install . --no-deps -vv --config-settings="build_ext" --config-settings="--inplace" --config-settings="--compiler=msvc"
+        pip install . --no-deps -vv --config-settings="--build-option=build_ext" --config-settings="--build-option=--inplace" --config-settings="--build-option=--compiler=msvc"
         pytest -q tests
