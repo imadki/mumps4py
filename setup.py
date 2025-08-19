@@ -99,7 +99,7 @@ metadata = {
 
 }
 
-CYTHON_VERSION = '0.29.26'
+CYTHON_VERSION = '3.0.0'
 
 # --------------------------------------------------------------------
 # Helper Functions
@@ -255,7 +255,7 @@ def run_setup():
             'clean': CleanCommand,
             'sdist': sdist,
         },
-        install_requires=['numpy', 'mpi4py', f'Cython>={CYTHON_VERSION}'],
+        install_requires=[],
         zip_safe=False,
         **metadata
     )
