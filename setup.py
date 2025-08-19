@@ -82,7 +82,7 @@ topdir = os.path.abspath(os.path.dirname(__file__))
 
 metadata = {
     "name": "mumps4py",
-    "version": "0.1.1rc0",
+    "version": "1.0.0",
     "description": "MUMPS for Python",
     "long_description": open(os.path.join(topdir, 'README.md')).read() if \
     os.path.exists(os.path.join(topdir, 'README.md')) else "A Python interface to the MUMPS solver library",
@@ -99,7 +99,7 @@ metadata = {
 
 }
 
-CYTHON_VERSION = '0.29.26'
+CYTHON_VERSION = '3.0.0'
 
 # --------------------------------------------------------------------
 # Helper Functions
