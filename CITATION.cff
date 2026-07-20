@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use mumps4py in your research, please cite the archived software below."
+title: "mumps4py: A complete Python interface for the MUMPS sparse direct solver"
+type: software
+authors:
+  - family-names: "Kissami"
+    given-names: "Imad"
+    orcid: "https://orcid.org/0000-0001-6740-1085"
+    affiliation: "Mohammed VI Polytechnic University, Morocco"
+  - family-names: "Piat"
+    given-names: "William"
+    orcid: "https://orcid.org/0000-0002-1340-2047"
+    affiliation: "SafranTech, Paris, France"
+version: 1.0.1
+doi: 10.5281/zenodo.21456003
+date-released: 2026-07-20
+url: "https://doi.org/10.5281/zenodo.21456003"
+repository-code: "https://github.com/imadki/mumps4py"
+license: MIT
