@@ -66,12 +66,29 @@ class MumpsSolver:
         
     def _transform_array_to_pointer(self):
         """Configure the MUMPS system based on precision and type."""
-        
-        self.transform_arr = lambda arr: (
-            ctypes.cast(arr.ctypes.data, ctypes.c_void_p).value
-            if not (np.issubdtype(arr.dtype, np.integer) and arr.dtype != self.int_size)
-            else exec("raise TypeError(f'Array types differ: MUMPS expect {self.int_size}, but got {arr.dtype}')")
-        )
+
+        # MUMPS stores only a raw C pointer to the arrays we hand it and reads
+        # them later (during analyze/factorize/solve). We must therefore keep a
+        # Python reference alive for the lifetime of the solver, otherwise the
+        # array (e.g. a temporary ``mtx.row + 1``) is garbage-collected and
+        # MUMPS reads freed/recycled memory -> corrupted indices or errors such
+        # as -6 (structurally singular) or -53. Keeping the reference here fixes
+        # every ``set_*`` entry point at once.
+        self._kept_arrays = []
+
+        def transform_arr(arr):
+            if np.issubdtype(arr.dtype, np.integer) and arr.dtype != self.int_size:
+                raise TypeError(
+                    f"Array types differ: MUMPS expects {self.int_size}, "
+                    f"but got {arr.dtype}"
+                )
+            # Ensure C-contiguous memory so the raw pointer is valid.
+            arr = np.ascontiguousarray(arr)
+            # Keep the array alive as long as MUMPS may read it.
+            self._kept_arrays.append(arr)
+            return ctypes.cast(arr.ctypes.data, ctypes.c_void_p).value
+
+        self.transform_arr = transform_arr
 
     def _load_mumps_module(self):
         """Dynamically load the MUMPS module and stop execution if missing."""
