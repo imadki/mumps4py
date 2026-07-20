@@ -24,6 +24,7 @@ jobs:
         environment-file: tests/env_windows.yml
         auto-activate-base: false
         conda-remove-defaults: "true"
+        python-version: ${{ matrix.python-version }}
     - name: Install compiler
       id: install_cc
       uses: rlalik/setup-cpp-compiler@master
