@@ -1,6 +1,8 @@
 # MUMPS4PY
 Python Interface for the MUMPS Solver
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21456003.svg)](https://doi.org/10.5281/zenodo.21456003)
+
 ## Overview
 MUMPS4PY is a Python wrapper for the **MUltifrontal Massively Parallel Solver (MUMPS)**, enabling efficient sparse matrix computations with parallel processing. It provides a high-performance interface for solving sparse linear systems using **MPI-based parallelism**.
 
@@ -132,13 +134,16 @@ python setup.py clean
 
 ## Citation
 
-```bash
-@techreport{mumps4py2025,
-  title = {Mumps4py: Python interface for the MUMPS solver},
-  author = {I. Kissami},
-  month = mar,
-  year = {2025},
-  institution = {Mohammed VI Polytechnic University},
-  doi = {10.13140/RG.2.2.26885.05606/2}
+If you use mumps4py in your research, please cite the archived software:
+
+```bibtex
+@software{mumps4py,
+  title     = {mumps4py: A complete Python interface for the MUMPS sparse direct solver},
+  author    = {Kissami, Imad and Piat, William},
+  year      = {2025},
+  publisher = {Zenodo},
+  version   = {1.0.1},
+  doi       = {10.5281/zenodo.21456003},
+  url       = {https://doi.org/10.5281/zenodo.21456003}
 }
 ```
