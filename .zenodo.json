@@ -1,0 +1,27 @@
+{
+  "title": "mumps4py: A complete Python interface for the MUMPS sparse direct solver",
+  "description": "mumps4py is a Python interface to MUMPS (MUltifrontal Massively Parallel Sparse direct Solver). It wraps the full MUMPS C API through a low-overhead Cython layer, integrates with NumPy and mpi4py, and supports all four MUMPS arithmetics (real/complex, single/double) as well as centralized and distributed assembly, elemental input, sparse right-hand sides and Schur complement computation.",
+  "upload_type": "software",
+  "license": "MIT",
+  "keywords": [
+    "MUMPS",
+    "sparse linear algebra",
+    "direct solver",
+    "high-performance computing",
+    "MPI",
+    "Cython",
+    "Python"
+  ],
+  "creators": [
+    {
+      "name": "Kissami, Imad",
+      "orcid": "0000-0001-6740-1085",
+      "affiliation": "Mohammed VI Polytechnic University, Morocco"
+    },
+    {
+      "name": "Piat, William",
+      "orcid": "0000-0002-1340-2047",
+      "affiliation": "SafranTech, Paris, France"
+    }
+  ]
+}

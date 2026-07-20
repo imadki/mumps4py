@@ -18,6 +18,9 @@ You can install `mumps4py` on Linux, MacOS, and Windows using [conda/mamba](http
 ```conda install mumps4py```
 
 
+## Documentation
+- **API reference**: [docs/api.md](docs/api.md) — the full `MumpsSolver` interface.
+
 ## Install manually
 ### Platform-Specific Installation Guides
 - **Linux (Ubuntu)**: See instructions below.

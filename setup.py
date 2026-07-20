@@ -82,14 +82,14 @@ topdir = os.path.abspath(os.path.dirname(__file__))
 
 metadata = {
     "name": "mumps4py",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "MUMPS for Python",
     "long_description": open(os.path.join(topdir, 'README.md')).read() if \
     os.path.exists(os.path.join(topdir, 'README.md')) else "A Python interface to the MUMPS solver library",
     "long_description_content_type":"text/markdown",
     "keywords": ['MUMPS', 'solver', 'MPI'],
     "url": "https://github.com/imadki/mumps4py",
-    "download_url": "https://pypi.io/packages/source/m/mumps4py/mumps4py-0.1.0.tar.gz",
+    "download_url": "https://github.com/imadki/mumps4py/archive/refs/tags/1.0.1.tar.gz",
     "provides": ['mumps4py'],
     "requires": ['numpy', 'mpi4py'],
     "classifiers": [
